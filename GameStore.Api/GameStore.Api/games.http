@@ -1,0 +1,18 @@
+### GAMES
+GET http://localhost:5225/games
+
+
+### GAME
+GET http://localhost:5225/games/7
+
+
+### CREATE GAME
+POST http://localhost:5225/games
+Content-Type: application/json
+
+{
+    "name": "New Game",
+    "genre": "Action",
+    "price": 59.99,
+    "releaseDate": "2026-01-01"
+}
