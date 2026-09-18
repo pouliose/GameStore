@@ -1,9 +1,9 @@
-### GAMES
+### GET GAMES
 GET http://localhost:5225/games
 
 
-### GAME
-GET http://localhost:5225/games/7
+### GET GAME
+GET http://localhost:5225/games/3
 
 
 ### CREATE GAME
@@ -13,6 +13,20 @@ Content-Type: application/json
 {
     "name": "New Game",
     "genre": "Action",
-    "price": 59.99,
+    "price": 599.99,
     "releaseDate": "2026-01-01"
 }
+
+### UPDATE GAME
+PUT http://localhost:5225/games/3
+Content-Type: application/json
+
+{
+    "name": "New Game",
+    "genre": "Action-adventure",
+    "price": 999.99,
+    "releaseDate": "2026-01-11"
+}
+
+### DELETE GAME
+DELETE http://localhost:5225/games/1
