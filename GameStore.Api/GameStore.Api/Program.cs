@@ -1,14 +1,12 @@
 using GameStore.Api.Data;
 using GameStore.Api.Endpoints;
+using GameStore.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connString = "GameStoreConnection";
-
-builder.Services.AddDbContext<GameStoreContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString(connString)));
+builder.SeedDatabase();
 
 var app = builder.Build();
 
