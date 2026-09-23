@@ -42,7 +42,7 @@ public static class GameEndpoints
 
         group.MapPost("/", async (CreateGameDto createGameDto, GameStoreContext dbContext) =>
         {
-            var genre = await GetOrCreateGenreAsync(dbContext, createGameDto.Genre);
+            var genre = await GetOrCreateGenreAsync(dbContext, createGameDto.GenreId);
             var game = new Models.Game
             {
                 Name = createGameDto.Name,
@@ -54,8 +54,8 @@ public static class GameEndpoints
             dbContext.Games.Add(game);
             await dbContext.SaveChangesAsync();
 
-            var response = new GameDto(game.Id, game.Name, genre.Name, game.Price, game.ReleaseDate);
-            return Results.CreatedAtRoute(GetGameEndpointName, new { id = game.Id }, response);
+            var response = new GameDtoUIResponse(game.Id, game.Name, genre.Id, game.Price, game.ReleaseDate);
+            return Results.CreatedAtRoute(GetGameEndpointName, new { id = response.Id }, response);
         }).AddEndpointFilter<DataAnnotationsValidationFilter<CreateGameDto>>();
 
         group.MapPut("/{id}", async (int id, UpdateGameDto updateGameDto, GameStoreContext dbContext) =>
@@ -66,7 +66,7 @@ public static class GameEndpoints
                 return Results.NotFound();
             }
 
-            var genre = await GetOrCreateGenreAsync(dbContext, updateGameDto.Genre);
+            var genre = await GetOrCreateGenreAsync(dbContext, updateGameDto.GenreId);
             game.Name = updateGameDto.Name;
             game.Genre = genre;
             game.Price = updateGameDto.Price;
@@ -93,17 +93,17 @@ public static class GameEndpoints
 
     private static async Task<Models.Genre> GetOrCreateGenreAsync(
         GameStoreContext dbContext,
-        string name)
+        int genreId)
     {
         var genre = await dbContext.Genres
-            .FirstOrDefaultAsync(item => item.Name == name);
+            .FirstOrDefaultAsync(item => item.Id == genreId);
 
         if (genre is not null)
         {
             return genre;
         }
 
-        genre = new Models.Genre { Name = name };
+        genre = new Models.Genre { Id = genreId, Name = string.Empty };
         dbContext.Genres.Add(genre);
         return genre;
     }

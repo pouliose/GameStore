@@ -12,8 +12,8 @@ Content-Type: application/json
 
 {
     "name": "New Game",
-    "genre": "Action",
-    "price": 599.99,
+    "genreId": 1,
+    "price": 99.99,
     "releaseDate": "2026-01-01"
 }
 
