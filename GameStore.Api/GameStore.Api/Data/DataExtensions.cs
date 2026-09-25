@@ -25,6 +25,7 @@ public static class DataExtensions
                 .UseSeeding((context, _) =>
                 {
 
+                    /* If records already exists skip seeding part*/
                     if (context.Set<Game>().Any())
                     {
                         return;
@@ -53,7 +54,7 @@ public static class DataExtensions
                         context.Set<Game>().Add(new Game
                         {
                             Name = record.Name,
-                            GenreId = genre.Id,
+                            Genre = genre,
                             Price = record.Price,
                             ReleaseDate = record.ReleaseDate
                         });

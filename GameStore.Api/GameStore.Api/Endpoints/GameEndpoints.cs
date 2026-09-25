@@ -68,7 +68,7 @@ public static class GameEndpoints
 
             var genre = await GetOrCreateGenreAsync(dbContext, updateGameDto.GenreId);
             game.Name = updateGameDto.Name;
-            game.Genre = genre;
+            game.GenreId = updateGameDto.GenreId;
             game.Price = updateGameDto.Price;
             game.ReleaseDate = updateGameDto.ReleaseDate;
             await dbContext.SaveChangesAsync();

@@ -8,6 +8,7 @@ builder.SeedDatabase();
 var app = builder.Build();
 
 app.MapGameEndpoints();
+app.MapGenreEndpoints();
 
 app.MigrateDatabase();
 

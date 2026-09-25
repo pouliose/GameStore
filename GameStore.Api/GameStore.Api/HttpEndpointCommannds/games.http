@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:5225
+
+### GET GAMES
+GET {{baseUrl}}/games
+
+### GET GAME
+GET {{baseUrl}}/games/1
+
+### CREATE GAME
+POST {{baseUrl}}/games
+Content-Type: application/json
+
+{
+    "name": "New Game 25-09 E",
+    "genreId": 1,
+    "price": 22.22,
+    "releaseDate": "2026-02-09"
+}
+
+### UPDATE GAME
+PUT {{baseUrl}}/games/4002
+Content-Type: application/json
+
+{
+    "name": "New Game 25-09",
+    "genreId": 3,
+    "price": 11.11,
+    "releaseDate": "2026-01-11"
+}
+
+### DELETE GAME
+DELETE {{baseUrl}}/games/3003
