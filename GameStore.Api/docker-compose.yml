@@ -4,12 +4,37 @@ services:
     container_name: gamestore-sql
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "YourStrongPassword123!"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-YourStrongPassword123!}
     ports:
       - "1433:1433"
     volumes:
       - gamestore-sql-data:/var/opt/mssql
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: GameStore.Api/Dockerfile
+    container_name: gamestore-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__GameStoreConnection: "Server=sqlserver,1433;Database=GameStoreDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:-YourStrongPassword123!};TrustServerCertificate=True"
+    ports:
+      - "5225:8080"
+    volumes:
+      - gamestore-api-logs:/app/logs
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   gamestore-sql-data:
+  gamestore-api-logs:

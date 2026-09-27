@@ -1,15 +1,27 @@
 # GameStore API
 
-A minimal ASP.NET Core Web API for managing video games. The project targets .NET 9 and currently exposes game endpoints.
+A minimal ASP.NET Core Web API for managing video games. The project targets .NET 9 and currently exposes game and genre endpoints.
 
 ## Project Structure
 
-- `GameStore.Api/` - Main API project
-- `GameStore.Api/Dtos/` - Request and response data-transfer objects
-- `GameStore.Api/Endpoints/` - Minimal API endpoint mappings
-- `GameStore.Api/Models/` - Domain models such as `Game` and `Genre`
-- `GameStore.Api/Validation/` - Endpoint validation filters
-- `GameStore.Api/games.http` - Sample HTTP requests
+```text
+GameStore.Api/
+|-- docker-compose.yml        # Runs the API and SQL Server
+|-- GameStore.slnx            # Solution containing API and test projects
+|-- GameStore.Api/
+|   |-- Data/                 # EF Core context, setup, and migrations
+|   |-- Dtos/                 # Request and response data-transfer objects
+|   |-- Endpoints/            # Minimal API route mappings
+|   |-- HttpEndpointCommannds/ # Sample .http requests for games and genres
+|   |-- Middleware/           # Failed-request body capture for logging
+|   |-- Models/               # Game and genre entities
+|   |-- Resources/            # CSV seed data
+|   |-- Validation/           # Data annotation endpoint filter
+|   |-- Dockerfile            # Multi-stage API image build
+|   |-- Program.cs            # Application and middleware configuration
+|   `-- appsettings*.json     # Logging and environment configuration
+`-- GameStore.Api.Tests/      # API integration and middleware tests
+```
 
 ## Requirements
 
@@ -35,14 +47,38 @@ After starting the SQL Server container, open the SQL Server extension in VS Cod
 
 ## Run the API
 
-From the `GameStore.Api` project directory:
+From the solution directory, start SQL Server and the API together:
 
 ```powershell
-dotnet restore
-dotnet run
+docker compose up --build
 ```
 
-The API endpoints are available under `/games`.
+The API is available at `http://localhost:5225`; endpoints include `/games` and `/genres`. Compose waits for SQL Server to become healthy before starting the API. Keep this command running to see container output. Stop both services with `Ctrl+C`, or run `docker compose down` from another terminal.
+
+To override the sample SQL Server password for local development, set the environment variable before starting Compose:
+
+```powershell
+$env:MSSQL_SA_PASSWORD = "choose-a-local-password"
+docker compose up --build
+```
+
+The sample password is for local demos only; use managed secrets for deployments.
+
+## Check Logs
+
+Follow the API's console logs, including request summaries and application events, from the solution directory:
+
+```powershell
+docker compose logs -f api
+```
+
+The API also writes daily JSON files under `/app/logs` inside the container. List the files with:
+
+```powershell
+docker compose exec api sh -c "ls -lh /app/logs"
+```
+
+Database files and API log files are stored in named Docker volumes and survive `docker compose down`. **Do not run `docker compose down -v` unless you intend to delete both the database data and the stored logs.**
 
 ## Run Tests
 
@@ -56,7 +92,7 @@ The API integration tests use an isolated SQLite in-memory database and do not r
 
 ## Production Configuration and Logging
 
-The API writes structured JSON logs to stdout and to daily rolling files under `logs/`, retaining the most recent 14 files. Application logs include game create, update, delete, and database migration events. Failed requests include original JSON request and response bodies, each capped at 4 KB; larger request bodies are omitted and larger response bodies are marked as truncated. Bodies are not redacted, so credentials or other sensitive values in them are written to the log files. Restrict log access and retention accordingly. In production, collect stdout/stderr with the hosting platform or a centralized log provider. If the API runs in a container and file logs must survive container replacement, mount `logs/` to persistent storage; the current Compose file only runs SQL Server.
+The API writes structured JSON logs to stdout and to daily rolling files under `logs/`, retaining the most recent 14 files. Application logs include game create, update, delete, and database migration events. Failed requests include original JSON request and response bodies, each capped at 4 KB; larger request bodies are omitted and larger response bodies are marked as truncated. Bodies are not redacted, so credentials or other sensitive values in them are written to the log files. Restrict log access and retention accordingly. In production, collect stdout/stderr with the hosting platform or a centralized log provider. The Compose setup mounts the API log directory to a named volume so files persist across container replacement.
 
 Set the production database connection string through configuration rather than committing it to `appsettings.json`. For example, in a deployment environment set `ConnectionStrings__GameStoreConnection` to the connection string supplied by your secret manager. The checked-in connection string is limited to Development settings for local use.
 
