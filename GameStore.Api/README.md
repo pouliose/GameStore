@@ -44,6 +44,22 @@ dotnet run
 
 The API endpoints are available under `/games`.
 
+## Run Tests
+
+From the solution directory, run:
+
+```powershell
+dotnet test GameStore.slnx
+```
+
+The API integration tests use an isolated SQLite in-memory database and do not require the development SQL Server container.
+
+## Production Configuration and Logging
+
+The API writes structured JSON logs to stdout and to daily rolling files under `logs/`, retaining the most recent 14 files. Application logs include game create, update, delete, and database migration events. Failed requests include original JSON request and response bodies, each capped at 4 KB; larger request bodies are omitted and larger response bodies are marked as truncated. Bodies are not redacted, so credentials or other sensitive values in them are written to the log files. Restrict log access and retention accordingly. In production, collect stdout/stderr with the hosting platform or a centralized log provider. If the API runs in a container and file logs must survive container replacement, mount `logs/` to persistent storage; the current Compose file only runs SQL Server.
+
+Set the production database connection string through configuration rather than committing it to `appsettings.json`. For example, in a deployment environment set `ConnectionStrings__GameStoreConnection` to the connection string supplied by your secret manager. The checked-in connection string is limited to Development settings for local use.
+
 ## Install Entity Framework Core SQL Server
 
 Run these commands from the `GameStore.Api` project directory:

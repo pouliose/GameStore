@@ -42,7 +42,12 @@ public static class GameEndpoints
 
         group.MapPost("/", async (CreateGameDto createGameDto, GameStoreContext dbContext) =>
         {
-            var genre = await GetOrCreateGenreAsync(dbContext, createGameDto.GenreId);
+            var genre = await dbContext.Genres.FindAsync(createGameDto.GenreId);
+            if (genre is null)
+            {
+                return Results.BadRequest(new { message = "The specified genre does not exist." });
+            }
+
             var game = new Models.Game
             {
                 Name = createGameDto.Name,
@@ -66,7 +71,12 @@ public static class GameEndpoints
                 return Results.NotFound();
             }
 
-            var genre = await GetOrCreateGenreAsync(dbContext, updateGameDto.GenreId);
+            var genre = await dbContext.Genres.FindAsync(updateGameDto.GenreId);
+            if (genre is null)
+            {
+                return Results.BadRequest(new { message = "The specified genre does not exist." });
+            }
+
             game.Name = updateGameDto.Name;
             game.GenreId = updateGameDto.GenreId;
             game.Price = updateGameDto.Price;
@@ -91,20 +101,4 @@ public static class GameEndpoints
         });
     }
 
-    private static async Task<Models.Genre> GetOrCreateGenreAsync(
-        GameStoreContext dbContext,
-        int genreId)
-    {
-        var genre = await dbContext.Genres
-            .FirstOrDefaultAsync(item => item.Id == genreId);
-
-        if (genre is not null)
-        {
-            return genre;
-        }
-
-        genre = new Models.Genre { Id = genreId, Name = string.Empty };
-        dbContext.Genres.Add(genre);
-        return genre;
-    }
 }

@@ -11,7 +11,9 @@ public static class DataExtensions
     {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<GameStoreContext>();
+        app.Logger.LogInformation("Applying database migrations");
         dbContext.Database.Migrate();
+        app.Logger.LogInformation("Database migrations completed");
     }
 
     public static void SeedDatabase(this WebApplicationBuilder builder)

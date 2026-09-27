@@ -2,3 +2,25 @@
 
 ### GET Genres
 GET {{baseUrl}}/genres
+
+### GET Genre
+GET {{baseUrl}}/genres/1
+
+### CREATE GENRE
+POST {{baseUrl}}/genres
+Content-Type: application/json
+
+{
+	"name": "Puzzle"
+}
+
+### UPDATE GENRE
+PUT {{baseUrl}}/genres/1
+Content-Type: application/json
+
+{
+	"name": "Role-Playing"
+}
+
+### DELETE GENRE
+DELETE {{baseUrl}}/genres/4
