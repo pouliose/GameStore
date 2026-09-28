@@ -1,10 +1,13 @@
 @baseUrl = http://localhost:5225
 
 ### GET Genres
-GET {{baseUrl}}/genres
+GET {{baseUrl}}/genres?page=1&pageSize=20
 
 ### GET Genre
 GET {{baseUrl}}/genres/1
+
+### GET GAMES IN GENRE
+GET {{baseUrl}}/genres/2/games?page=1&pageSize=20
 
 ### CREATE GENRE
 POST {{baseUrl}}/genres

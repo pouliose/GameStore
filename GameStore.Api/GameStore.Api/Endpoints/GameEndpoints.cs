@@ -11,18 +11,31 @@ public static class GameEndpoints
 
     public static void MapGameEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/games");
+        var group = app.MapGroup("/games").WithTags("Games");
 
-        group.MapGet("/", async (GameStoreContext dbContext) =>
-            await dbContext.Games
-                .AsNoTracking()
+        group.MapGet("/", async (GameStoreContext dbContext, int page = 1, int pageSize = Pagination.DefaultPageSize) =>
+        {
+            if (!Pagination.IsValid(page, pageSize))
+            {
+                return Results.BadRequest(new { message = Pagination.InvalidParametersMessage });
+            }
+
+            var gamesQuery = dbContext.Games.AsNoTracking();
+            var totalCount = await gamesQuery.CountAsync();
+            var games = await gamesQuery
+                .OrderBy(game => game.Id)
+                .Skip(Pagination.GetOffset(page, pageSize))
+                .Take(pageSize)
                 .Select(game => new GameDto(
                     game.Id,
                     game.Name,
                     game.Genre!.Name,
                     game.Price,
                     game.ReleaseDate))
-                .ToListAsync());
+                .ToListAsync();
+
+            return Results.Ok(new PagedResponse<GameDto>(games, page, pageSize, totalCount));
+        });
 
         group.MapGet("/{id}", async (int id, GameStoreContext dbContext) =>
         {

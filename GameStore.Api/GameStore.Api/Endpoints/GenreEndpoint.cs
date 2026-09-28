@@ -1,4 +1,5 @@
 using GameStore.Api.Data;
+using GameStore.Api.Dtos;
 using GameStore.Api.Dtos.Genre;
 using GameStore.Api.Validation;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +12,26 @@ public static class GenreEndpoint
 
     public static void MapGenreEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/genres");
+        var group = app.MapGroup("/genres").WithTags("Genres");
 
-        group.MapGet("/", async (GameStoreContext dbContext) =>
-            await dbContext.Genres
-                .AsNoTracking()
+        group.MapGet("/", async (GameStoreContext dbContext, int page = 1, int pageSize = Pagination.DefaultPageSize) =>
+        {
+            if (!Pagination.IsValid(page, pageSize))
+            {
+                return Results.BadRequest(new { message = Pagination.InvalidParametersMessage });
+            }
+
+            var genresQuery = dbContext.Genres.AsNoTracking();
+            var totalCount = await genresQuery.CountAsync();
+            var genres = await genresQuery
+                .OrderBy(genre => genre.Id)
+                .Skip(Pagination.GetOffset(page, pageSize))
+                .Take(pageSize)
                 .Select(genre => new GenreDto(genre.Id, genre.Name))
-                .ToListAsync());
+                .ToListAsync();
+
+            return Results.Ok(new PagedResponse<GenreDto>(genres, page, pageSize, totalCount));
+        });
 
         group.MapGet("/{id}", async (int id, GameStoreContext dbContext) =>
         {
@@ -70,6 +84,38 @@ public static class GenreEndpoint
             dbContext.Genres.Remove(genre);
             await dbContext.SaveChangesAsync();
             return Results.NoContent();
+        });
+
+        group.MapGet("/{id}/games", async (int id, GameStoreContext dbContext, int page = 1, int pageSize = Pagination.DefaultPageSize) =>
+        {
+            if (!Pagination.IsValid(page, pageSize))
+            {
+                return Results.BadRequest(new { message = Pagination.InvalidParametersMessage });
+            }
+
+            if (!await dbContext.Genres.AnyAsync(genre => genre.Id == id))
+            {
+                return Results.NotFound();
+            }
+
+            var games = dbContext.Games
+                .AsNoTracking()
+                .Where(game => game.GenreId == id);
+
+            var totalCount = await games.CountAsync();
+            var pageItems = await games
+                .OrderBy(game => game.Id)
+                .Skip(Pagination.GetOffset(page, pageSize))
+                .Take(pageSize)
+                .Select(game => new GameDto(
+                    game.Id,
+                    game.Name,
+                    game.Genre!.Name,
+                    game.Price,
+                    game.ReleaseDate))
+                .ToListAsync();
+
+            return Results.Ok(new PagedResponse<GameDto>(pageItems, page, pageSize, totalCount));
         });
     }
 }

@@ -1,7 +1,7 @@
 @baseUrl = http://localhost:5225
 
 ### GET GAMES
-GET {{baseUrl}}/games
+GET {{baseUrl}}/games?page=1&pageSize=20
 
 ### GET GAME
 GET {{baseUrl}}/games/1
@@ -22,10 +22,10 @@ PUT {{baseUrl}}/games/4002
 Content-Type: application/json
 
 {
-    "name": "New Game 25-09",
-    "genreId": 3,
-    "price": 11.11,
-    "releaseDate": "2026-01-11"
+    "name": "Stardew Valley",
+    "genreId": 2,
+     "price": 14.99,
+    "releaseDate": "2016-02-26"
 }
 
 ### DELETE GAME

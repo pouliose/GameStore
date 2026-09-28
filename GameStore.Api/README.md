@@ -53,7 +53,7 @@ From the solution directory, start SQL Server and the API together:
 docker compose up --build
 ```
 
-The API is available at `http://localhost:5225`; endpoints include `/games` and `/genres`. Compose waits for SQL Server to become healthy before starting the API. Keep this command running to see container output. Stop both services with `Ctrl+C`, or run `docker compose down` from another terminal.
+The API is available at `http://localhost:5225`; Swagger UI is available at `http://localhost:5225/swagger`. List endpoints (`/games`, `/genres`, and `/genres/{id}/games`) accept `page` and `pageSize` query parameters, defaulting to page 1 and 20 items per page. Page sizes are limited to 100 and offsets to 10,000 rows; responses include `items`, `page`, `pageSize`, and `totalCount`. Compose waits for SQL Server to become healthy before starting the API. Keep this command running to see container output. Stop both services with `Ctrl+C`, or run `docker compose down` from another terminal.
 
 To override the sample SQL Server password for local development, set the environment variable before starting Compose:
 

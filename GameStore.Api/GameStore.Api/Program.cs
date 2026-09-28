@@ -12,6 +12,9 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddProblemDetails();
 builder.SeedDatabase();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging(options =>
@@ -63,6 +66,8 @@ if (!app.Environment.IsEnvironment("Testing"))
     app.MigrateDatabase();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.Run();
 
 public partial class Program;
