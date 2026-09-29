@@ -10,6 +10,7 @@ builder.Host.UseSerilog((context, configuration) =>
 	configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks();
 builder.SeedDatabase();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -65,6 +66,8 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     app.MigrateDatabase();
 }
+
+app.MapHealthChecks("/health");
 
 app.UseSwagger();
 app.UseSwaggerUI();
